@@ -57,8 +57,8 @@ import java.util.concurrent.CompletableFuture;
 public class SiddhiExtensionInstallerService extends ExtensionService {
 
     private Map<String, ExtensionConfig> extensionConfigs;
-    private SiddhiAppStore siddhiAppStore;
-    private boolean extensionInstallerInitialized = false;
+    private final SiddhiAppStore siddhiAppStore;
+    private boolean initialized = false;
 
     public SiddhiExtensionInstallerService() {
         this.siddhiAppStore = new SiddhiAppStore();
@@ -67,10 +67,11 @@ public class SiddhiExtensionInstallerService extends ExtensionService {
     @JsonRequest
     public CompletableFuture<Object> initializeExtensionInstaller() {
         return CompletableFuture.supplyAsync(() -> {
-            if (!extensionInstallerInitialized) {
+            if (!initialized) {
                 try {
                     this.extensionConfigs =
                             ConfigMapper.loadAllExtensionConfigs(ExtensionsInstallerConstants.CONFIG_FILE_LOCATION);
+                    initialized = true;
                 } catch (ExtensionsInstallerException e) {
                     return new ExtensionInstallerInitializeResponse(false, e.getMessage());
                 }

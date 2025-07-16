@@ -48,9 +48,9 @@ import java.util.concurrent.CompletableFuture;
  */
 public class SiddhiTextDocumentService implements TextDocumentService {
 
-    private DocumentManager documentManager;
-    private SiddhiLanguageServer siddhiLanguageServer;
-    private DiagnosticProvider diagnosticProvider;
+    private final DocumentManager documentManager;
+    private final SiddhiLanguageServer siddhiLanguageServer;
+    private final DiagnosticProvider diagnosticProvider;
 
     public SiddhiTextDocumentService() {
         this.documentManager = DocumentManager.INSTANCE;

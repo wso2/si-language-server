@@ -51,21 +51,25 @@ import java.util.concurrent.CompletableFuture;
 @JsonSegment("flowDesignService")
 public class DesignModelGeneratorService extends ExtensionService {
 
+    private final DesignGenerator designGenerator;
+    private final CodeGenerator codeGenerator;
+    private static final Gson DEFAULT_GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+
+    public DesignModelGeneratorService() {
+        this.designGenerator = new DesignGenerator();
+        this.designGenerator.setSiddhiManager(LSOperationContext.INSTANCE.getSiddhiManager());
+        this.codeGenerator = new CodeGenerator();
+    }
+
     @JsonRequest
     public CompletableFuture<DesignModelResponse> getDesignView(GetDesignViewRequest getDesignViewRequest) {
         return CompletableFuture.supplyAsync(() -> {
             DesignModelResponse designModelResponse = new DesignModelResponse();
             try {
-                DesignGenerator designGenerator = new DesignGenerator();
-                designGenerator.setSiddhiManager(LSOperationContext.INSTANCE.getSiddhiManager());
-                String siddhiAppString =
-                        new String(Base64.getDecoder().decode(getDesignViewRequest.value), StandardCharsets.UTF_8);
-                EventFlow eventFlow = designGenerator.getEventFlow(siddhiAppString);
-                Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-                String eventFlowJson = gson.toJson(eventFlow);
-                byte[] encodedBytes = Base64.getEncoder().encode(eventFlowJson.getBytes(StandardCharsets.UTF_8));
-                String encodedString = new String(encodedBytes, StandardCharsets.UTF_8);
-                designModelResponse.setContent(encodedString);
+                String siddhiAppString = decodeBase64(getDesignViewRequest.value);
+                EventFlow eventFlow = this.designGenerator.getEventFlow(siddhiAppString);
+                String eventFlowJson = DEFAULT_GSON.toJson(eventFlow);
+                designModelResponse.setContent(encodeBase64(eventFlowJson));
                 return designModelResponse;
             } catch (SiddhiAppCreationException | DesignGenerationException e) {
                 designModelResponse.setError(e);
@@ -79,17 +83,11 @@ public class DesignModelGeneratorService extends ExtensionService {
         return CompletableFuture.supplyAsync(() -> {
             DesignModelResponse designModelResponse = new DesignModelResponse();
             try {
-                String eventFlowJson =
-                        new String(Base64.getDecoder().decode(sourceCodeRequest.designJson), StandardCharsets.UTF_8);
+                String eventFlowJson = decodeBase64(sourceCodeRequest.designJson);
                 Gson gson = DeserializersRegisterer.getGsonBuilder().disableHtmlEscaping().create();
                 EventFlow eventFlow = gson.fromJson(eventFlowJson, EventFlow.class);
-                CodeGenerator codeGenerator = new CodeGenerator();
                 String siddhiAppCode = codeGenerator.generateSiddhiAppCode(eventFlow);
-
-                String encodedSiddhiAppString =
-                        new String(Base64.getEncoder().encode(siddhiAppCode.getBytes(StandardCharsets.UTF_8)),
-                                StandardCharsets.UTF_8);
-                designModelResponse.setContent(encodedSiddhiAppString);
+                designModelResponse.setContent(encodeBase64(siddhiAppCode));
             } catch (CodeGenerationException e) {
                 designModelResponse.setError(e);
             }
@@ -105,9 +103,18 @@ public class DesignModelGeneratorService extends ExtensionService {
             Map<String, MetaData> extensions = SourceEditorUtils.getExtensionProcessorMetaData();
             response.setInBuilt(extensions.remove(""));
             response.setExtensions(extensions);
-            String jsonString = new Gson().toJson(response);
-            designModelResponse.setContent(jsonString);
+            designModelResponse.setContent(new Gson().toJson(response));
             return designModelResponse;
         });
+    }
+
+    private String decodeBase64(String encoded) {
+        byte[] decodedBytes = Base64.getDecoder().decode(encoded);
+        return new String(decodedBytes, StandardCharsets.UTF_8);
+    }
+
+    private String encodeBase64(String content) {
+        byte[] encodedBytes = Base64.getEncoder().encode(content.getBytes(StandardCharsets.UTF_8));
+        return new String(encodedBytes, StandardCharsets.UTF_8);
     }
 }

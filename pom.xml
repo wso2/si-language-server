@@ -120,6 +120,11 @@
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${maven.failsafe.plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${shade.plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -157,6 +162,11 @@
                 <version>${lsp4j.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.lsp4j</groupId>
+                <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+                <version>${lsp4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.analytics</groupId>
                 <artifactId>org.wso2.carbon.siddhi.editor.core</artifactId>
                 <version>${carbon.analytics.version}</version>
@@ -190,6 +200,36 @@
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${apache.commons.fileupload.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.github.azakordonets</groupId>
+                <artifactId>fabricator_2.10</artifactId>
+                <version>${fabricator.wso2v1.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.github.mifmif</groupId>
+                <artifactId>generex</artifactId>
+                <version>${generex.wso2v1.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
@@ -241,6 +281,9 @@
         <antlr4.runtime.version>4.11.1</antlr4.runtime.version>
         <gson.version>2.9.1</gson.version>
         <snakeyaml.version>2.2</snakeyaml.version>
+        <fabricator.wso2v1.version>2.1.4.wso2v1</fabricator.wso2v1.version>
+        <apache.commons.fileupload.version>1.5</apache.commons.fileupload.version>
+        <generex.wso2v1.version>1.0.0.wso2v1</generex.wso2v1.version>
 
         <maven.resources.plugin.version>3.1.0</maven.resources.plugin.version>
         <testng.version>7.0.0</testng.version>
@@ -252,6 +295,9 @@
         <io.fabric8.version>0.31.0</io.fabric8.version>
         <maven.failsafe.plugin.version>2.22.2</maven.failsafe.plugin.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
+        <log4j.version>2.22.1</log4j.version>
+        <shade.plugin.version>3.6.0</shade.plugin.version>
+        <slf4j.version>2.0.17</slf4j.version>
 
     </properties>
 

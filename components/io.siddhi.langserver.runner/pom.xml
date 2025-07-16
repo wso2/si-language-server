@@ -12,6 +12,10 @@
     <name>Siddhi Distribution Language Server - Runner</name>
     <dependencies>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.analytics</groupId>
             <artifactId>org.wso2.carbon.event.simulator.core</artifactId>
             <scope>compile</scope>
