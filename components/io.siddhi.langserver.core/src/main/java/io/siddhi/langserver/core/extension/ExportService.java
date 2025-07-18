@@ -71,7 +71,7 @@ public class ExportService extends ExtensionService {
     private void initializeConfigProvider() throws ConfigurationException {
         if (configProvider == null) {
             configProvider = ConfigProviderFactory.getConfigProvider(
-                    Paths.get(Utils.getCarbonConfigHome().toString(), "deployment.yaml"));
+                    Paths.get(Utils.getCarbonConfigHome().toString(), "server", "deployment.yaml"));
         }
     }
 }
