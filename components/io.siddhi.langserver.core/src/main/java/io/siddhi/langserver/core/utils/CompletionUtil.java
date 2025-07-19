@@ -34,6 +34,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +94,7 @@ public class CompletionUtil {
             completionItems = traverseUp(currentContextProvider);
             return completionItems;
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
