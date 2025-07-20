@@ -53,6 +53,7 @@ import org.wso2.carbon.event.simulator.core.impl.FilesApiServiceImpl;
 import org.wso2.carbon.event.simulator.core.internal.util.SimulationConfigUploader;
 import org.wso2.carbon.event.simulator.core.model.DBConnectionModel;
 import org.wso2.carbon.streaming.integrator.common.exception.ResponseMapper;
+import org.wso2.carbon.utils.Utils;
 import org.wso2.msf4j.formparam.FileInfo;
 
 import java.io.IOException;
@@ -80,6 +81,7 @@ public class EventSimulatorService extends ExtensionService {
             (DatabaseApiServiceImpl) DatabaseApiServiceFactory.getConnectToDatabaseApi();
     private final FeedApiServiceImpl feedApi = (FeedApiServiceImpl) FeedApiServiceFactory.getFeedApi();
     private boolean eventSimulatorInitialized = false;
+    private final Path csvBasePath = Paths.get(Utils.getRuntimePath().toString(), "deployment", "csv-files");
 
     @JsonRequest
     public CompletableFuture<EventSimulatorInitializeResponse> initializeEventSimulator() {
@@ -214,6 +216,11 @@ public class EventSimulatorService extends ExtensionService {
     public CompletableFuture<SimulatorResponse> uploadFile(FileInfo fileDetail) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                Path tempFile = csvBasePath.resolve("temp.temp");
+                if (Files.exists(tempFile)) {
+                    Files.delete(tempFile);
+                }
+
                 Path fileAbsolutePath = Paths.get(fileDetail.getFileName());
                 fileDetail.setFileName(fileAbsolutePath.getFileName().toString());
                 return buildSimulatorResponse(
