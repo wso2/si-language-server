@@ -26,8 +26,7 @@ import org.wso2.carbon.config.provider.ConfigProvider;
 import org.wso2.carbon.siddhi.editor.core.commons.request.ExportAppsRequest;
 import org.wso2.carbon.siddhi.editor.core.exception.DockerGenerationException;
 import org.wso2.carbon.siddhi.editor.core.exception.KubernetesGenerationException;
-import org.wso2.carbon.siddhi.editor.core.internal.ExportUtils;
-import org.wso2.carbon.siddhi.editor.core.vscode.PublicExportUtils;
+import org.wso2.carbon.siddhi.editor.core.util.ExportUtils;
 import org.wso2.carbon.utils.Utils;
 
 import java.nio.file.Paths;
@@ -56,9 +55,7 @@ public class ExportService extends ExtensionService {
             String errorMessage = "";
             try {
                 initializeConfigProvider();
-                ExportUtils exportUtils =
-                        PublicExportUtils.getExportUtils(this.configProvider,
-                                exportAppsRequest, EXPORT_TYPE_DOCKER);
+                ExportUtils exportUtils = new ExportUtils(configProvider, exportAppsRequest, EXPORT_TYPE_DOCKER);
                 exportUtils.createZipFile();
                 return new ExportResponse(true, errorMessage);
             } catch (DockerGenerationException | ConfigurationException | KubernetesGenerationException e) {
