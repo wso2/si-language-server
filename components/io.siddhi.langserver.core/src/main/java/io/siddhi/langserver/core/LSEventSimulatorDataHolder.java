@@ -43,7 +43,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Data Holder for Event Simulator
+ * Data Holder for Event Simulator.
  *
  * @since 1.0.0
  */

@@ -18,7 +18,7 @@
 package io.siddhi.langserver.core.request;
 
 /**
- * Request class to get attributes of a stream
+ * Request class to get attributes of a stream.
  *
  * @since 1.0.0
  */
