@@ -1,7 +1,7 @@
 name: Maven Release
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch: { }
 
 jobs:
   release:
@@ -84,7 +84,7 @@ jobs:
 
       - name: Deploy artifacts with Maven
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WSO2_INTEGRATION_BOT_TOKEN}}
         run: |
           mvn --batch-mode release:prepare release:perform \
             -DreleaseVersion=${{ steps.compute_next.outputs.release_version }} \
@@ -102,7 +102,7 @@ jobs:
 
       - name: Create Github Release with Assets
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WSO2_INTEGRATION_BOT_TOKEN }}
         run: |
           gh release create "${{ steps.compute_next.outputs.release_version }}" \
             --repo="$GITHUB_REPOSITORY" \
