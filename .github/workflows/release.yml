@@ -1,0 +1,58 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build artifacts
+        run: mvn -B clean install -DskipTests
+
+      - name: Get version
+        id: version
+        run: |
+          current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          release_version="${current_version/-SNAPSHOT/}"
+          echo "version=$release_version" >> $GITHUB_OUTPUT
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+
+      - name: Create release ZIP
+        run: |
+          zip -j si-language-server-${{ steps.version.outputs.version }}.zip \
+          components/io.siddhi.langserver.launcher/target/io.siddhi.langserver.launcher-${{ steps.version.outputs.current_version }}.jar \
+          components/io.siddhi.langserver.core/target/io.siddhi.langserver.core-${{ steps.version.outputs.current_version }}.jar \
+          components/io.siddhi.langserver.runner/target/io.siddhi.langserver.runner-${{ steps.version.outputs.current_version }}.jar \
+          -x '*tests.jar' '*-sources.jar' '*-javadoc.jar'
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: si-language-server-${{ steps.version.outputs.version }}
+          path: si-language-server-${{ steps.version.outputs.version }}.zip
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.WSO2_INTEGRATION_BOT_TOKEN }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            --repo="$GITHUB_REPOSITORY" \
+            --title="SI Language Server ${{ steps.version.outputs.version }}" \
+            --generate-notes \
+            --prerelease \
+            si-language-server-${{ steps.version.outputs.version }}.zip

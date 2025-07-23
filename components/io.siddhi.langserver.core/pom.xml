@@ -1,0 +1,143 @@
+<!--
+  ~ Copyright (c) 2025, WSO2 LLC. (http://wso2.com).
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>io.siddhi.langserver</groupId>
+        <artifactId>io.siddhi.langserver.parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>io.siddhi.langserver.core</artifactId>
+    <name>Siddhi Distribution Language Server - Core</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.siddhi</groupId>
+            <artifactId>siddhi-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.siddhi</groupId>
+            <artifactId>siddhi-query-compiler</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.siddhi.editor.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.streaming.integrator.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.event.simulator.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.analytics</groupId>
+            <artifactId>org.wso2.carbon.siddhi.extensions.installer.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.github.azakordonets</groupId>
+            <artifactId>fabricator_2.10</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.github.mifmif</groupId>
+            <artifactId>generex</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <includes>
+                                    <include>org.eclipse.lsp4j:org.eclipse.lsp4j</include>
+                                    <include>org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc</include>
+                                    <include>org.antlr:antlr4-runtime</include>
+                                    <include>org.wso2.carbon.analytics:org.wso2.carbon.siddhi.editor.core</include>
+                                    <include>org.wso2.carbon.analytics:org.wso2.carbon.event.simulator.core</include>
+                                    <include>
+                                        org.wso2.carbon.analytics:org.wso2.carbon.siddhi.extensions.installer.core
+                                    </include>
+                                    <include>commons-fileupload:commons-fileupload</include>
+                                    <include>org.wso2.orbit.com.github.azakordonets:fabricator_2.10</include>
+                                    <include>org.wso2.orbit.com.github.mifmif:generex</include>
+                                    <include>com.google.code.gson:gson</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>org.wso2.carbon.analytics:org.wso2.carbon.siddhi.editor.core</artifact>
+                                    <excludes>
+                                        <exclude>web/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
+                                        <exclude>META-INF/versions/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
