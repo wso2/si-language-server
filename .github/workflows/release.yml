@@ -43,6 +43,8 @@ jobs:
         mvn versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false
         git add .
         git commit -m "Prepare release ${VERSION}" || echo "No changes to commit"
+        # Push the release branch to remote
+        git push origin release-${VERSION}
 
     - name: Build Release Artifacts
       run: mvn -B clean install -DskipTests
