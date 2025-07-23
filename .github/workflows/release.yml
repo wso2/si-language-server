@@ -11,48 +11,64 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.WSO2_INTEGRATION_BOT_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: 'maven'
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-          cache: 'maven'
+    - name: Get Release Version
+      id: version
+      run: |
+        current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        release_version="${current_version/-SNAPSHOT/}"
+        echo "VERSION=$release_version" >> $GITHUB_ENV
+        echo "version=$release_version" >> $GITHUB_OUTPUT
+        echo "current_version=$current_version" >> $GITHUB_OUTPUT
 
-      - name: Build artifacts
-        run: mvn -B clean install -DskipTests
+    - name: Pre-Release Version Update
+      run: |
+        echo "Version: ${VERSION}"
+        git config --global user.name ${{ secrets.WSO2_INTEGRATION_BOT_USERNAME }}
+        git config --global user.email ${{ secrets.WSO2_INTEGRATION_BOT_EMAIL }}
+        git checkout -b release-${VERSION}
+        # Remove SNAPSHOT from all pom.xml files
+        mvn versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false
+        git add .
+        git commit -m "Prepare release ${VERSION}" || echo "No changes to commit"
 
-      - name: Get version
-        id: version
-        run: |
-          current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          release_version="${current_version/-SNAPSHOT/}"
-          echo "version=$release_version" >> $GITHUB_OUTPUT
-          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+    - name: Build Release Artifacts
+      run: mvn -B clean install -DskipTests
 
-      - name: Create release ZIP
-        run: |
-          zip -j si-language-server-${{ steps.version.outputs.version }}.zip \
-          components/io.siddhi.langserver.launcher/target/io.siddhi.langserver.launcher-${{ steps.version.outputs.current_version }}.jar \
-          components/io.siddhi.langserver.core/target/io.siddhi.langserver.core-${{ steps.version.outputs.current_version }}.jar \
-          components/io.siddhi.langserver.runner/target/io.siddhi.langserver.runner-${{ steps.version.outputs.current_version }}.jar \
-          -x '*tests.jar' '*-sources.jar' '*-javadoc.jar'
+    - name: Create release ZIP
+      run: |
+        zip -j si-language-server-${{ env.VERSION }}.zip \
+        components/io.siddhi.langserver.launcher/target/io.siddhi.langserver.launcher-${{ env.VERSION }}.jar \
+        components/io.siddhi.langserver.core/target/io.siddhi.langserver.core-${{ env.VERSION }}.jar \
+        components/io.siddhi.langserver.runner/target/io.siddhi.langserver.runner-${{ env.VERSION }}.jar \
+        -x '*tests.jar' '*-sources.jar' '*-javadoc.jar'
 
-      - name: Upload release artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: si-language-server-${{ steps.version.outputs.version }}
-          path: si-language-server-${{ steps.version.outputs.version }}.zip
+    - name: Upload release artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: si-language-server-${{ env.VERSION }}
+        path: si-language-server-${{ env.VERSION }}.zip
 
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.WSO2_INTEGRATION_BOT_TOKEN }}
-        run: |
-          gh release create "v${{ steps.version.outputs.version }}" \
-            --repo="$GITHUB_REPOSITORY" \
-            --title="SI Language Server ${{ steps.version.outputs.version }}" \
-            --generate-notes \
-            --prerelease \
-            si-language-server-${{ steps.version.outputs.version }}.zip
+    - name: GitHub Release and Release Sync PR
+      env:
+        GITHUB_TOKEN: ${{ secrets.WSO2_INTEGRATION_BOT_TOKEN }}
+      run: |
+        gh release create "v${{ env.VERSION }}" \
+          --repo="$GITHUB_REPOSITORY" \
+          --title="SI Language Server ${{ env.VERSION }}" \
+          --generate-notes \
+          --prerelease \
+          si-language-server-${{ env.VERSION }}.zip
+        gh pr create --base ${GITHUB_REF##*/} --title "[Automated] Sync ${GITHUB_REF##*/} after ${{ env.VERSION }} release" --body "Sync ${GITHUB_REF##*/} after ${{ env.VERSION }} release"
