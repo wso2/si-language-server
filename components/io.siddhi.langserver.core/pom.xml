@@ -131,6 +131,8 @@
                                         <exclude>META-INF/*.RSA</exclude>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                         <exclude>META-INF/versions/**</exclude>
+                                        <exclude>org/slf4j/impl/**</exclude>
+                                        <exclude>**/StaticLoggerBinder.class</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
