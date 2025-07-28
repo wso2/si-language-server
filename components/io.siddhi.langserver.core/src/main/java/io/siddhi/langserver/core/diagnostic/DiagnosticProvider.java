@@ -29,6 +29,9 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.services.LanguageClient;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +64,15 @@ public class DiagnosticProvider {
             LSOperationContext lsOperationContext = LSOperationContext.INSTANCE;
             SiddhiAppRuntime siddhiAppRuntime =
                     lsOperationContext.getSiddhiManager().createSiddhiAppRuntime(sourceContent);
-            String fileName = Paths.get(fileUri).getFileName().toString();
+
+            String fileName;
+            try {
+                Path filePath = Paths.get(new URI(fileUri));
+                fileName = filePath.getFileName().toString();
+            } catch (URISyntaxException e) {
+                fileName = Paths.get(fileUri).getFileName().toString();
+            }
+
             lsOperationContext.addSiddhiAppRuntime(fileName, siddhiAppRuntime);
             List<Diagnostic> diagnostics = new ArrayList<>();
             client.publishDiagnostics(new PublishDiagnosticsParams(fileUri, diagnostics));
