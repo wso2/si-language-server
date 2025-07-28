@@ -58,6 +58,10 @@ public class SiddhiTextDocumentService implements TextDocumentService {
         this.diagnosticProvider = LSOperationContext.INSTANCE.getDiagnosticProvider();
     }
 
+    private Path getPathFromUri(String fileUri) throws URISyntaxException {
+        return Paths.get(new URI(fileUri));
+    }
+
     /**
      * The method is called to retrieve completion items upon a request of a client for completions for a given
      * completion parameter combination({@link org.eclipse.lsp4j.CompletionContext}).
@@ -97,10 +101,14 @@ public class SiddhiTextDocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
         String documentUri = didOpenTextDocumentParams.getTextDocument().getUri();
         String documentContent = didOpenTextDocumentParams.getTextDocument().getText();
-        this.documentManager.openFile(Paths.get(URI.create(documentUri)), documentContent);
-        if (siddhiLanguageServer.getClient() != null) {
-            this.diagnosticProvider
-                    .compileAndSendDiagnostics(siddhiLanguageServer.getClient(), documentUri, documentContent);
+        try {
+            this.documentManager.openFile(getPathFromUri(documentUri), documentContent);
+            if (siddhiLanguageServer.getClient() != null) {
+                this.diagnosticProvider
+                        .compileAndSendDiagnostics(siddhiLanguageServer.getClient(), documentUri, documentContent);
+            }
+        } catch (URISyntaxException e) {
+            //TODO: an error message should be logged once the logging framework is integrated.
         }
     }
 
@@ -115,16 +123,14 @@ public class SiddhiTextDocumentService implements TextDocumentService {
         String documentUri = didChangeTextDocumentParams.getTextDocument().getUri();
         try {
             List<TextDocumentContentChangeEvent> changes = didChangeTextDocumentParams.getContentChanges();
+            Path documentPath = getPathFromUri(documentUri);
             for (TextDocumentContentChangeEvent changeEvent : changes) {
-                documentManager.updateFile(Paths.get(URI.create(documentUri)), changeEvent.getText());
+                documentManager.updateFile(documentPath, changeEvent.getText());
             }
-            try {
-                this.diagnosticProvider.compileAndSendDiagnostics(siddhiLanguageServer.getClient(), documentUri,
-                        documentManager.getFileContent(Paths.get(URI.create(documentUri))));
-            } catch (Throwable ignored) {
-                String msg = "Computing 'diagnostics' failed!";
-                //todo: an error message should be logged once the logging framework is integrated.
-            }
+            
+            this.diagnosticProvider.compileAndSendDiagnostics(siddhiLanguageServer.getClient(), documentUri,
+                    documentManager.getFileContent(documentPath));
+                
         } catch (Throwable ignored) {
             String msg = "Operation 'text/didChange' failed!";
             //todo: an error message should be logged once the logging framework is integrated.
@@ -140,7 +146,11 @@ public class SiddhiTextDocumentService implements TextDocumentService {
     @Override
     public void didClose(DidCloseTextDocumentParams didCloseTextDocumentParams) {
         String fileUri = didCloseTextDocumentParams.getTextDocument().getUri();
-        this.documentManager.closeFile(Paths.get(URI.create(fileUri)));
+        try {
+            this.documentManager.closeFile(getPathFromUri(fileUri));
+        } catch (URISyntaxException e) {
+            //TODO: an error message should be logged once the logging framework is integrated.
+        }
     }
 
     /**
