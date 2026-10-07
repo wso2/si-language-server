@@ -146,6 +146,14 @@
                                     <shadedPattern>io.siddhi.langserver.shaded.com.google.thirdparty</shadedPattern>
                                 </relocation>
                                 <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>io.siddhi.langserver.shaded.com.fasterxml.jackson</shadedPattern>
+                                    <excludes>
+                                        <exclude>com.fasterxml.jackson.datatype.joda.**</exclude>
+                                        <exclude>com.fasterxml.jackson.jaxrs.**</exclude>
+                                    </excludes>
+                                </relocation>
+                                <relocation>
                                     <pattern>org.reflections</pattern>
                                     <shadedPattern>io.siddhi.langserver.shaded.org.reflections</shadedPattern>
                                 </relocation>
