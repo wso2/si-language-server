@@ -136,6 +136,32 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>io.siddhi.langserver.shaded.com.google.common</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.thirdparty</pattern>
+                                    <shadedPattern>io.siddhi.langserver.shaded.com.google.thirdparty</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.reflections</pattern>
+                                    <shadedPattern>io.siddhi.langserver.shaded.org.reflections</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons</pattern>
+                                    <shadedPattern>io.siddhi.langserver.shaded.org.apache.commons</shadedPattern>
+                                    <excludes>
+                                        <exclude>org.apache.commons.csv.**</exclude>
+                                        <exclude>org.apache.commons.vfs2.**</exclude>
+                                        <exclude>org.apache.commons.collections.**</exclude>
+                                        <exclude>org.apache.commons.validator.**</exclude>
+                                        <exclude>org.apache.commons.beanutils.**</exclude>
+                                        <exclude>org.apache.commons.logging.**</exclude>
+                                    </excludes>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
