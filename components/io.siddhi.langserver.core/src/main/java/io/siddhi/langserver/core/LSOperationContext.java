@@ -62,6 +62,10 @@ public class LSOperationContext {
         siddhiAppRuntimeMap.put(siddhiAppName, siddhiAppRuntime);
     }
 
+    public SiddhiAppRuntime removeSiddhiAppRuntime(String siddhiAppName) {
+        return siddhiAppRuntimeMap.remove(siddhiAppName);
+    }
+
     public boolean checkIfSiddhiAppRuntimeExists(String siddhiAppName) {
         return siddhiAppRuntimeMap.containsKey(siddhiAppName);
     }
