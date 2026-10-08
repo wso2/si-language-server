@@ -62,9 +62,6 @@ public class DiagnosticProvider {
     public void compileAndSendDiagnostics(LanguageClient client, String fileUri, String sourceContent) {
         try {
             LSOperationContext lsOperationContext = LSOperationContext.INSTANCE;
-            SiddhiAppRuntime siddhiAppRuntime =
-                    lsOperationContext.getSiddhiManager().createSiddhiAppRuntime(sourceContent);
-
             String fileName;
             try {
                 Path filePath = Paths.get(new URI(fileUri));
@@ -73,6 +70,12 @@ public class DiagnosticProvider {
                 fileName = Paths.get(fileUri).getFileName().toString();
             }
 
+            SiddhiAppRuntime previousRuntime = lsOperationContext.removeSiddhiAppRuntime(fileName);
+            if (previousRuntime != null) {
+                previousRuntime.shutdown();
+            }
+            SiddhiAppRuntime siddhiAppRuntime =
+                    lsOperationContext.getSiddhiManager().createSiddhiAppRuntime(sourceContent);
             lsOperationContext.addSiddhiAppRuntime(fileName, siddhiAppRuntime);
             List<Diagnostic> diagnostics = new ArrayList<>();
             client.publishDiagnostics(new PublishDiagnosticsParams(fileUri, diagnostics));

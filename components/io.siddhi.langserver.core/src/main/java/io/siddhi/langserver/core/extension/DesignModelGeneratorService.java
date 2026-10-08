@@ -20,8 +20,9 @@ package io.siddhi.langserver.core.extension;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.langserver.core.LSOperationContext;
 import io.siddhi.langserver.core.request.GetDesignViewRequest;
 import io.siddhi.langserver.core.request.GetSourceCodeRequest;
 import io.siddhi.langserver.core.response.DesignModelResponse;
@@ -39,6 +40,7 @@ import org.wso2.carbon.siddhi.editor.core.util.designview.exceptions.CodeGenerat
 import org.wso2.carbon.siddhi.editor.core.util.designview.exceptions.DesignGenerationException;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -52,12 +54,13 @@ import java.util.concurrent.CompletableFuture;
 public class DesignModelGeneratorService extends ExtensionService {
 
     private final DesignGenerator designGenerator;
+    private final SiddhiManager designSiddhiManager = new SiddhiManager();
     private final CodeGenerator codeGenerator;
     private static final Gson DEFAULT_GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     public DesignModelGeneratorService() {
         this.designGenerator = new DesignGenerator();
-        this.designGenerator.setSiddhiManager(LSOperationContext.INSTANCE.getSiddhiManager());
+        this.designGenerator.setSiddhiManager(designSiddhiManager);
         this.codeGenerator = new CodeGenerator();
     }
 
@@ -67,7 +70,7 @@ public class DesignModelGeneratorService extends ExtensionService {
             DesignModelResponse designModelResponse = new DesignModelResponse();
             try {
                 String siddhiAppString = decodeBase64(getDesignViewRequest.value);
-                EventFlow eventFlow = this.designGenerator.getEventFlow(siddhiAppString);
+                EventFlow eventFlow = generateEventFlow(siddhiAppString);
                 String eventFlowJson = DEFAULT_GSON.toJson(eventFlow);
                 designModelResponse.setContent(encodeBase64(eventFlowJson));
                 return designModelResponse;
@@ -106,6 +109,16 @@ public class DesignModelGeneratorService extends ExtensionService {
             designModelResponse.setContent(new Gson().toJson(response));
             return designModelResponse;
         });
+    }
+
+    private synchronized EventFlow generateEventFlow(String siddhiAppString) throws DesignGenerationException {
+        try {
+            return designGenerator.getEventFlow(siddhiAppString);
+        } finally {
+            for (SiddhiAppRuntime runtime : new ArrayList<>(designSiddhiManager.getSiddhiAppRuntimeMap().values())) {
+                runtime.shutdown();
+            }
+        }
     }
 
     private String decodeBase64(String encoded) {
